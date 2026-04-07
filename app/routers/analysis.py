@@ -6,6 +6,7 @@ from uuid import UUID, uuid4
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from sqlalchemy import and_, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from app.db import SessionLocal, get_db
@@ -35,9 +36,15 @@ def _process_request_in_background(request_id: str) -> None:
 def _get_or_create_customer(db: Session, customer_id: str) -> Customer:
     customer = db.get(Customer, customer_id)
     if customer is None:
-        customer = Customer(id=customer_id)
-        db.add(customer)
-        db.flush()
+        try:
+            with db.begin_nested():
+                customer = Customer(id=customer_id)
+                db.add(customer)
+                db.flush()
+        except IntegrityError:
+            customer = db.get(Customer, customer_id)
+            if customer is None:
+                raise
     return customer
 
 
@@ -50,9 +57,13 @@ def _get_or_create_user(db: Session, customer_id: str, user_id: str) -> User:
     )
     user = db.execute(stmt).scalar_one_or_none()
     if user is None:
-        user = User(id=user_id, customer_id=customer_id)
-        db.add(user)
-        db.flush()
+        try:
+            with db.begin_nested():
+                user = User(id=user_id, customer_id=customer_id)
+                db.add(user)
+                db.flush()
+        except IntegrityError:
+            user = db.execute(stmt).scalar_one()
     return user
 
 
