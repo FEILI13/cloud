@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.db import SessionLocal, get_db
 from app.models import AnalysisPhoto, AnalysisRequest, Customer, User
+from app.queue import enqueue_analysis_request
 from app.schemas import (
     CreateAnalysisRequest,
     RequestDetailResponse,
@@ -107,7 +108,9 @@ def create_analysis_request(
 
     db.commit()
 
-    background_tasks.add_task(_process_request_in_background, request.id)
+    enqueued = enqueue_analysis_request(request.id, request.urgent)
+    if not enqueued:
+        background_tasks.add_task(_process_request_in_background, request.id)
 
     request = (
         db.query(AnalysisRequest)

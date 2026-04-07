@@ -25,6 +25,9 @@ def process_request(db: Session, request_id: str) -> None:
     request = db.execute(stmt).unique().scalar_one_or_none()
     if request is None:
         return
+    if request.status != "pending":
+        print(f"[worker] request={request_id} already {request.status}; skipping")
+        return
 
     try:
         print(f"[worker] start processing request={request_id}")
