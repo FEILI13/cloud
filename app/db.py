@@ -7,7 +7,7 @@ from sqlalchemy.orm import declarative_base, sessionmaker, Session
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./ageoverflow.db")
 
-engine_kwargs = {}
+engine_kwargs = {"pool_pre_ping": True}
 if DATABASE_URL.startswith("sqlite"):
     # SQLite needs this flag for multithread access in local dev.
     engine_kwargs["connect_args"] = {"check_same_thread": False}

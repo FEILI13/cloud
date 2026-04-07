@@ -21,6 +21,7 @@ from app.schemas import (
     UserDetailResponse,
     UserSummaryResponse,
 )
+from app.storage import store_photo_content
 from app.worker import process_request
 
 router = APIRouter(prefix="/api/v1/analysis", tags=["analysis"])
@@ -97,12 +98,18 @@ def create_analysis_request(
     db.flush()
 
     for idx, photo in enumerate(payload.photos):
+        photo_ref, storage_type = store_photo_content(
+            customer_id_str,
+            request.id,
+            idx,
+            photo,
+        )
         db.add(
             AnalysisPhoto(
                 request_id=request.id,
                 photo_index=idx,
-                photo_ref=photo,
-                storage_type="inline",
+                photo_ref=photo_ref,
+                storage_type=storage_type,
             )
         )
 

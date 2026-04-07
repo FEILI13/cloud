@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.models import AnalysisProbability, AnalysisRequest
 from app.services.engine import EngineError, run_engine
+from app.storage import load_photo_content
 
 
 def utcnow() -> datetime:
@@ -37,7 +38,7 @@ def process_request(db: Session, request_id: str) -> None:
         db.refresh(request)
 
         content = [
-            photo.photo_ref
+            load_photo_content(photo.photo_ref, photo.storage_type)
             for photo in sorted(request.photos, key=lambda p: p.photo_index)
         ]
 

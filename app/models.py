@@ -80,6 +80,8 @@ class AnalysisRequest(Base):
         Index("idx_requests_customer_user", "customer_id", "user_id"),
         Index("idx_requests_customer_status", "customer_id", "status"),
         Index("idx_requests_customer_generation", "customer_id", "generation"),
+        Index("idx_requests_customer_status_submitted", "customer_id", "status", "submitted_at"),
+        Index("idx_requests_customer_user_submitted", "customer_id", "user_id", "submitted_at"),
         CheckConstraint(
             "status IN ('pending', 'success', 'failed')",
             name="ck_analysis_requests_status_valid",
