@@ -14,4 +14,4 @@ db_password       = "Xiaoxiao020805!"
 db_instance_class = "db.t3.micro"
 
 repo_url    = "https://github.com/FEILI13/cloud.git"
-repo_subdir = "cloud_app"
+repo_subdir = ""
