@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
 
-DATABASE_URL = "sqlite:///./ageoverflow.db"
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./ageoverflow.db")
 
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False},  # SQLite only
-)
+engine_kwargs = {}
+if DATABASE_URL.startswith("sqlite"):
+    # SQLite needs this flag for multithread access in local dev.
+    engine_kwargs["connect_args"] = {"check_same_thread": False}
+
+engine = create_engine(DATABASE_URL, **engine_kwargs)
 
 SessionLocal = sessionmaker(
     autocommit=False,
